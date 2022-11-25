@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Auth;
+use App\Http\Controllers\MailController;
+use App\Models\EmailVerification;
 
 class AuthController extends Controller
 {
@@ -24,6 +26,8 @@ class AuthController extends Controller
     {
 
 
+        #dd("fap");
+
         if(!Auth::check()){
             $validator = Validator::make($request->all(), [
                 'email' => 'required|string|email|max:25',
@@ -34,9 +38,17 @@ class AuthController extends Controller
                 return response()->json($validator->errors(), 422);
             }
 
+
+
             if (! $token = auth()->attempt($validator->validated())) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
+
+            if(! EmailVerificationController::check($request->email))
+            {
+                return response()->json('go verify bitch', 300); #problem wrong login info
+                #not verified
+            };
 
             $token = Auth::attempt($request->except('_token'));
 
@@ -50,6 +62,7 @@ class AuthController extends Controller
             }
 
 
+
             return response()->json($data);
         }
         else{ die; }
@@ -59,13 +72,21 @@ class AuthController extends Controller
 
     public function register(Request $req)
     {
-        $data = $req->all;
-        Validator::make($data, [
+
+        $data = $req->all();
+
+        $validator = Validator::make($data, [
                 'first_name' => ['required', 'string', 'max:255'],
                 'last_name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'string', 'email', 'max:25', 'unique:users'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
+                'password_confirmation' => ['required_with:password', 'string', 'min:8', 'same:password'],
             ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
 
         $user = User::create([
             'first_name' => $req['first_name'],
@@ -78,9 +99,18 @@ class AuthController extends Controller
 
         $token = Auth::login($user);
 
+        $code = rand(10000,99999);
+
+        EmailVerification::create([
+            'user_id' => $user->id,
+            'code' => $code,
+        ]);
+
+        MailController::sendcode($code,$user->email);
+
         return response()->json([
             'status' => 'success',
-            'message' => 'User created successfully',
+            'message' => 'User created successfully, Please check your email for the verification code.',
             'user' => $user,
             'authorisation' => [
                 'token' => $token,

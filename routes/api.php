@@ -2,7 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\{UserController, AuthController};
+use App\Http\Controllers\Api\{UserController, AuthController, EmailVerificationController};
+
 
 /*
 |--------------------------------------------------------------------------
@@ -15,21 +16,32 @@ use App\Http\Controllers\Api\{UserController, AuthController};
 |
 */
 
-Route::group([/*'middleware' => 'auth:sanctum',*/ 'namespace' => 'Api'],function()
+
+Route::group(['namespace' => 'Api'], function()
+{
+    Route::post('/register', [AuthController::class, 'register']);
+
+    #Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::post('/verify', [EmailVerificationController::class, 'verify']);
+
+});
+
+
+Route::group([/*'middleware' => 'EmailVerificationMiddleware',*/ 'namespace' => 'Api'],function()
 {
 
     //Route::get('api-test/{id?}', [UserController::class, 'get_user_by_id']);
 
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-    Route::post('/login', [AuthController::class, 'login']);
-
-    Route::post('/logout', [AuthController::class, 'logout']);
+    #Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::post('/refresh', [AuthController::class, 'refresh']);
 
     Route::post('/loginweb', [AuthController::class, 'login'])->name('weblogin');
 
-    Route::post('/createcard', [UserController::class, 'create_card']);
+    Route::post('/createcard', [UserController::class, 'create_card']); #add gate
 }
 );

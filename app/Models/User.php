@@ -26,6 +26,7 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'role_id',
         'friends',
+        'verified',
     ];
     public function card()
     {
@@ -35,6 +36,11 @@ class User extends Authenticatable implements JWTSubject
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function emailverification()
+    {
+        return $this->hasone(EmailVerification::class);
     }
     /**
      * The attributes that should be hidden for serialization.

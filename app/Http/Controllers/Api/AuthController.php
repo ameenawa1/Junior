@@ -57,7 +57,7 @@ class AuthController extends Controller
             if($data['user']['role_id'] == 1)
             {
                 Auth::logout();
-
+                #dd($data['user']['role_id']);
                 return response()->json("Login not allowed", 401);
             }
 
@@ -76,12 +76,23 @@ class AuthController extends Controller
         $data = $req->all();
 
         $validator = Validator::make($data, [
-                'first_name' => ['required', 'string', 'max:255'],
-                'last_name' => ['required', 'string', 'max:255'],
+                'first_name' => ['required', 'string', 'max:20'],
+                'last_name' => ['required', 'string', 'max:20'],
                 'email' => ['required', 'string', 'email', 'max:25', 'unique:users'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
                 'password_confirmation' => ['required_with:password', 'string', 'min:8', 'same:password'],
             ]);
+
+
+        $errors=$validator->errors()->get('email');
+
+
+        //dd($errors);
+
+
+
+
+
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);

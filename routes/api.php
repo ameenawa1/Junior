@@ -25,6 +25,7 @@ Route::group(['namespace' => 'Api'], function()
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::post('/verify', [EmailVerificationController::class, 'verify']);
+    Route::post('/resend_code',[UserController::class, 'resend_code']);
 
 });
 

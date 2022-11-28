@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Card;
+use App\Models\EmailVerification;
+use App\Models\PasswordReset;
 use App\Http\Controllers\Api\PhoneNumberController;
 use App\Http\Controllers\Api\LinkController;
 use Illuminate\Support\Facades\Validator;
 use Auth;
+use App\Http\Controllers\MailController;
 
 class UserController extends Controller
 {
@@ -17,6 +20,106 @@ class UserController extends Controller
     public function get_user_by_id($id=null)
     {
         return $id ? User::find($id) : User::all();
+    }
+
+
+    public function request_password_change(Request $request)
+    {
+        $data =$request->all();
+
+        $validator = Validator::make($data,[
+            "email" => ['required', 'string', 'email', 'max:25']
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = User::where('email','=',$data['email'])->first();
+
+        if(! $user)
+        {
+            return response()->json("User not found.", 422);
+        }
+
+        $code = rand(10000,99999);
+
+        $email = $user['email'];
+
+        PasswordReset::create([   #CONTINUE HERE
+            'email' => $email,
+            'token' => $code
+        ]);
+
+        MailController::send_password_reset_code($code,$email);
+
+        return response()->json('Check your email for reset code.');
+
+    }
+
+    public function check_password_reset_code(Request $request)
+    {
+        /*$code, $user_id, $new_password*/
+
+        $data =$request->all();
+
+        $validator = Validator::make($data,[
+            "code" => "required|numeric|digits:5",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+
+    }
+
+
+
+    public function resend_code(Request $req)
+    {
+
+        $data = $req->all();
+
+        $validator = Validator::make($data,[
+            "email" => "string|required|max:25|email",
+        ]);
+
+        if ($validator->fails())
+        {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = User::where('email', '=',$data['email'])->first();
+
+        if(!$user)
+        {
+            return response()->json("User not found");
+        }
+
+        if($user['verified'] == 1)
+        {
+            return response()->json("User is already verified.");
+        }
+
+        $code = EmailVerification::where('user_id', '=', $user['id'])->first();
+
+        if(!$code)
+        {
+            $send_me_as_code = rand(10000,99999);
+
+            EmailVerification::create([
+                'user_id' => $user->id,
+                'code' => $send_me_as_code,
+            ]);
+        }
+        else
+        {
+            $send_me_as_code = $code['code'];
+        }
+
+        MailController::sendcode($send_me_as_code,$user->email);
+        return response()->json("Success", 200);
     }
 
     public function create_card(Request $req)
@@ -40,6 +143,12 @@ class UserController extends Controller
              if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
+
+            if(! EmailVerificationController::check($req->email)) #allow different emails
+            {
+                return response()->json('go verify bitch', 300); #problem wrong login info
+                #not verified
+            };
 
 
             $user = Auth::user();

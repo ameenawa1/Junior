@@ -1,6 +1,6 @@
 @component('mail::message')
 
-Your email verification code is: {{ $code }}
+Your password reset code is: {{ $code }}
 
 @endcomponent
 

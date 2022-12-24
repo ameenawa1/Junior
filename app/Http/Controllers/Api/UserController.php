@@ -46,14 +46,17 @@ class UserController extends Controller
 
         $email = $user['email'];
 
-        PasswordReset::create([   #CONTINUE HERE
+        PasswordReset::create([   #CONTINUE HERE ----- ADD SOME REFERENCE TO THE USER FOR ADDED SECURITY THEN-
+                                  # CONTINUE IN CHECK_PASSWORD_RESET_CODE FUNCTION AND CHECK IF THE CODE IS
+                                  # CORRECT AND OWNED BY THE USER OR NOT
+                                  # THEN CREATE A PASSWORD CHANGE FUNCTION THAT UPDATES THE DB
             'email' => $email,
             'token' => $code
         ]);
 
         MailController::send_password_reset_code($code,$email);
 
-        return response()->json('Check your email for reset code.');
+        return response()->json('Check your email for the password reset code.');
 
     }
 
@@ -68,10 +71,19 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return 1;
         }
 
 
+    }
+
+    public function change_password(Request $req)
+    {
+        $code = $req->code;
+        if(check_password_reset_code($code) == 1)
+        {
+            return response()->json($validator->errors(), 422);
+        }
     }
 
 
@@ -144,14 +156,44 @@ class UserController extends Controller
                 return response()->json($validator->errors(), 422);
             }
 
-            if(! EmailVerificationController::check($req->email)) #allow different emails
-            {
-                return response()->json('go verify bitch', 300); #problem wrong login info
-                #not verified
-            };
 
-
+            #validate email regex DONE
+            #check if email exists in db
+                #if it exists check if the owner is the same person creating the card
+                #else reject the email
+            $email = $req->email;
+            $email_checker = User::where('email', '=', $email)->first();
             $user = Auth::user();
+            if( $email_checker)
+            {
+                #email is in db
+                #check owner
+                #$current_user = Auth::user();
+
+                if(! $user->email == $email)
+                {
+                    return response()->json("This email is owned by a different account.",301);
+                }
+            }
+
+
+
+
+                /*if(! EmailVerificationController::check($req->email)) #allow different emails
+            {
+
+                if (! $token = auth()->attempt($validator->validated())) {
+                    return response()->json(['error' => 'Unauthorized'], 401);
+                }
+                $token = Auth::attempt($request->except('_token'));
+                #dd($token);
+                return response()->json("Email not found",404);
+                #return response()->json('test message', 300); #problem wrong login info
+                #not verified
+            };*/
+
+
+
             //dd($user);
             if(! $user['email'] == $req['email'])
             {
@@ -195,8 +237,8 @@ class UserController extends Controller
         }
         else
         {
-            print_r("u fucked up and now imma die :(");
-            die;
+
+            return response()->json("Please login to create a card",401);
         }
     }
 }

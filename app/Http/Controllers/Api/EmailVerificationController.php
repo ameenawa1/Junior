@@ -74,7 +74,7 @@ class EmailVerificationController extends Controller
         }
         else
         {
-            response()->json('now imma die, u fucked up *dies*', 300)->send();
+            response()->json('u fucked up and now imma die :( *dies*', 300)->send();
             die;
         }
     }

@@ -10,11 +10,9 @@ class LinkController extends Controller
 {
     public function add(int $card_id, $link)
     {
-
         Link::create([
             'link' => $link,
             'card_id' => $card_id,
         ]);
-
     }
 }

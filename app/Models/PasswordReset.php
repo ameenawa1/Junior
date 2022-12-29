@@ -9,13 +9,14 @@ class PasswordReset extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
     protected $fillable = [
         'email',
         'token',
-
     ];
-
+    
     protected $hidden = [
         'created_at',
+        'updated_at'
     ];
 }

@@ -17,6 +17,5 @@ class MailController extends Controller
     public function send_password_reset_code($code, $email)
     {
         return Mail::to($email)->send(new SendPasswordReset($code)); #
-
     }
 }

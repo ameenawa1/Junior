@@ -14,91 +14,56 @@ use App\Models\EmailVerification;
 
 class AuthController extends Controller
 {
-
     public function __construct()
     {
-
-        $this->middleware('auth:api', ['except' => ['login','register']]);
-
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
     public function login(Request $request)
     {
-
-
-        #dd("fap");
-
-        if(!Auth::check()){
+        if (!Auth::check()) {
             $validator = Validator::make($request->all(), [
                 'email' => 'required|string|email|max:25',
                 'password' => 'required|string|min:8',
-             ]);
-
-             if ($validator->fails()) {
+            ]);
+            if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
-
-
-
-            if (! $token = auth()->attempt($validator->validated())) {
+            if (!$token = auth()->attempt($validator->validated())) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
-
-            if(! EmailVerificationController::check($request->email))
-            {
+            $x = new EmailVerificationController();
+            if (!$x->check($request->email)) {
                 return response()->json('go verify bitch', 300); #problem wrong login info
                 #not verified
             };
-
             $token = Auth::attempt($request->except('_token'));
-
             $data = ['token' => $token, 'user' => Auth::user()];
-
-            if($data['user']['role_id'] == 1)
-            {
+            if ($data['user']['role_id'] == 1) {
                 Auth::logout();
-                #dd($data['user']['role_id']);
                 return response()->json("Login not allowed", 401);
             }
-
-
-
             return response()->json($data);
+        } else {
+            die;
         }
-        else{ die; }
-
     }
 
 
     public function register(Request $req)
     {
-
         $data = $req->all();
-
         $validator = Validator::make($data, [
-                'first_name' => ['required', 'string', 'max:20'],
-                'last_name' => ['required', 'string', 'max:20'],
-                'email' => ['required', 'string', 'email', 'max:25', 'unique:users'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
-                'password_confirmation' => ['required_with:password', 'string', 'min:8', 'same:password'],
-            ]);
-
-
-        $errors=$validator->errors()->get('email');
-
-
-        //dd($errors);
-
-
-
-
-
-
+            'first_name' => ['required', 'string', 'max:20'],
+            'last_name' => ['required', 'string', 'max:20'],
+            'email' => ['required', 'string', 'email', 'max:25', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password_confirmation' => ['required_with:password', 'string', 'min:8', 'same:password'],
+        ]);
+        $errors = $validator->errors()->get('email');
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-
-
         $user = User::create([
             'first_name' => $req['first_name'],
             'last_name' => $req['last_name'],
@@ -106,18 +71,15 @@ class AuthController extends Controller
             'password' => Hash::make($req['password']),
             'role_id' => 2,
             'friends' => "example",
-            ]);
-
+        ]);
         $token = Auth::login($user);
-
-        $code = rand(10000,99999);
-
+        $code = rand(10000, 99999);
         EmailVerification::create([
             'user_id' => $user->id,
             'code' => $code,
         ]);
-
-        MailController::sendcode($code,$user->email);
+        $x = new MailController();
+        $x->sendcode($code, $user->email);
 
         return response()->json([
             'status' => 'success',

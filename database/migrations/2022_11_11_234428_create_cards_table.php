@@ -15,12 +15,18 @@ class CreateCardsTable extends Migration
     {
         Schema::create('cards', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->string('displayname')->nullable();
+            $table->string('job_title')->nullable();
+            $table->text('about')->nullable();
+            $table->string('email')->nullable();
             $table->string('address')->nullable();
-            $table->string('qr_code')->nullable();
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-
-            $table->timestamps();
+            $table->string('phone_num1')->nullable();
+            $table->string('phone_num2')->nullable();
+            $table->text('facebook')->nullable();
+            $table->text('instagram')->nullable();
+            $table->text('linkedin')->nullable();
+            $table->text('github')->nullable();
         });
     }
 

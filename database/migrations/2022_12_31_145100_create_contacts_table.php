@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLinksTable extends Migration
+class CreateContactsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateLinksTable extends Migration
      */
     public function up()
     {
-        Schema::create('links', function (Blueprint $table) {
+        Schema::create('contacts', function (Blueprint $table) {
             $table->id();
-            $table->string('link');
-            $table->unsignedBigInteger('card_id');
-            $table->foreign('card_id')->references('id')->on('cards')->onDelete('cascade');
-            $table->timestamps();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('contact_id')->constrained('users')->cascadeOnDelete();
         });
     }
 
@@ -29,6 +27,6 @@ class CreateLinksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('links');
+        Schema::dropIfExists('contacts');
     }
 }

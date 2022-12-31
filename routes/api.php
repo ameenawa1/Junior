@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\{UserController, AuthController, EmailVerificationController};
-
+use App\Http\Controllers\Api\{UserController, AuthController, CardController, EmailVerificationController};
+use App\Http\Controllers\ContactController;
 
 Route::group(['namespace' => 'Api'], function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -12,6 +12,9 @@ Route::group(['namespace' => 'Api'], function () {
     Route::post('/reset-password', [UserController::class, 'resetPass']);
     Route::post('/change-password', [UserController::class, 'changePassword']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::post('/update_card', [CardController::class, 'update']);
+    Route::post('/add_contact/{user_id}', [ContactController::class, 'add_contact']);
+    Route::get('/contacts', [ContactController::class, 'contacts_list']);
 });
 
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Card;
 use Illuminate\Http\Request;
 use App\Models\EmailVerification;
 use App\Models\User;
@@ -14,10 +15,7 @@ class EmailVerificationController extends Controller
 {
     public function check($email)
     {
-        #validate $email
-        #dd($email);
         $user = User::where('email', '=', $email)->first();
-        #dd($user->verified);
         if ($user != null && $user->verified == 1) {
             return true;
         }
@@ -25,7 +23,7 @@ class EmailVerificationController extends Controller
     }
 
     public function verify(Request $request)
-    {  #edit idea: generate code and send it to application and email instead of saving in db
+    {
         $data = $request->all();
         $validator = Validator::make($data, [
             "verification_code" => "required|numeric|digits:5",
@@ -50,6 +48,9 @@ class EmailVerificationController extends Controller
             $user['verified'] = 1;
             $user->save();
             EmailVerification::find($correctcode['id'])->delete();
+            Card::create([
+                'user_id' => $user->id
+            ]);
             return response()->json('User verified', 200);
         } else {
             response()->json('u fucked up and now imma die :( *dies*', 300)->send();

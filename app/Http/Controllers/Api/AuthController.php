@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Auth;
 use App\Http\Controllers\MailController;
+use App\Models\Card;
 use App\Models\EmailVerification;
 
 class AuthController extends Controller
@@ -34,11 +35,14 @@ class AuthController extends Controller
             }
             $x = new EmailVerificationController();
             if (!$x->check($request->email)) {
-                return response()->json('go verify bitch', 300); #problem wrong login info
-                #not verified
+                return response()->json('go verify bitch', 300);
             };
             $token = Auth::attempt($request->except('_token'));
-            $data = ['token' => $token, 'user' => Auth::user()];
+            $data = [
+                'token' => $token,
+                'user' => Auth::user(),
+                'card' => Card::where('user_id', auth()->user()->id)->first()
+            ];
             if ($data['user']['role_id'] == 1) {
                 Auth::logout();
                 return response()->json("Login not allowed", 401);

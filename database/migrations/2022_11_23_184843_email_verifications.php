@@ -18,7 +18,6 @@ class EmailVerifications extends Migration
             $table->unsignedBigInteger('user_id')->unique();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedInteger('code');
-
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ class EmailVerifications extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('email_verifications');
     }
 }

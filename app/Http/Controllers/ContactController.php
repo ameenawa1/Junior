@@ -19,22 +19,22 @@ class ContactController extends Controller
         ]);
     }
 
-    public function add_contact($user_id)
+    public function add_contact($contact_id)
     {
-        $user = User::find($user_id);
+        $user = User::find($contact_id);
         if ($user == null)
             return response()->json('there is no user with this id', 400);
 
-        if (auth()->id() == $user_id)
+        if (auth()->id() == $contact_id)
             return response()->json('u can\'t add ur self');
 
-        $contact = Contact::where(['contact_id' => $user_id, 'user_id' => auth()->id()])->first();
+        $contact = Contact::where(['contact_id' => $contact_id, 'user_id' => auth()->id()])->first();
         if ($contact != null)
             return response()->json('u already have this user in ur contacts list');
 
         Contact::create([
             'user_id' => auth()->id(),
-            'contact_id' => $user_id
+            'contact_id' => $contact_id
         ]);
         $contacts = User::with('contacts', 'contacts.card')->find(auth()->id());
 
@@ -42,5 +42,10 @@ class ContactController extends Controller
             'message' => 'added successfully',
             'data' => $contacts
         ]);
+    }
+
+    public function distroy($contact_id){
+        $contact = Contact::where('contact_id', $contact_id)->delete();
+        return response()->json('contact has deleted successfully');
     }
 }

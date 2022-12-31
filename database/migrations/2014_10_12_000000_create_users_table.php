@@ -17,15 +17,13 @@ return new class extends Migration
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
-
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('friends');
             $table->unsignedBigInteger('role_id');
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->rememberToken();
-            $table->timestamps();
             $table->boolean('verified')->default(0);
+            $table->timestamps();
         });
     }
 

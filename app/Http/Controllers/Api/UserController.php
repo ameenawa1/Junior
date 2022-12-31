@@ -37,7 +37,6 @@ class UserController extends Controller
         }
         $code = rand(10000, 99999);
         $email = $user['email'];
-        PasswordReset::where('email', $user['email'])->delete();
         PasswordReset::create([   #CONTINUE HERE ----- ADD SOME REFERENCE TO THE USER FOR ADDED SECURITY THEN-
             # CONTINUE IN CHECK_PASSWORD_RESET_CODE FUNCTION AND CHECK IF THE CODE IS
             # CORRECT AND OWNED BY THE USER OR NOT
@@ -45,8 +44,8 @@ class UserController extends Controller
             'email' => $email,
             'token' => $code
         ]);
-        $x = new MailController();
-        $x->send_password_reset_code($code, $email);
+        $mailer = new MailController();
+        $mailer->send_password_reset_code($code, $email);
         return response()->json('Check your email for the password reset code.');
     }
 

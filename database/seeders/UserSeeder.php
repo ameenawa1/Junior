@@ -24,7 +24,6 @@ class UserSeeder extends Seeder
             'password' => Hash::make('dexdexdex'),
             'email' => 'admin@admin.com',
             'role_id' => Role::where('name', 'admin')->get()->first()->id,
-            'friends' => "a;b;c",
             'verified' => 1,
           ]);
 
@@ -34,7 +33,6 @@ class UserSeeder extends Seeder
           'password' => Hash::make('dexdexdex'),
           'email' => 'user1@email.com',
           'role_id' => Role::where('name', 'user')->get()->first()->id,
-          'friends' => "a;b;c",
           'verified' => 1,
         ]);
         $user = User::create([
@@ -43,7 +41,6 @@ class UserSeeder extends Seeder
             'password' => Hash::make('dexdexdex'),
             'email' => 'user2@email.com',
             'role_id' => Role::where('name', 'user')->get()->first()->id,
-            'friends' => "a;b;c",
             'verified' => 0,
           ]);
     }

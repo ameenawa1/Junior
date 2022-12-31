@@ -74,7 +74,6 @@ class AuthController extends Controller
             'email' => $req['email'],
             'password' => Hash::make($req['password']),
             'role_id' => 2,
-            'friends' => "example",
         ]);
         $token = Auth::login($user);
         $code = rand(10000, 99999);

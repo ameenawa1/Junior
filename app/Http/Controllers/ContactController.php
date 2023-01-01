@@ -44,8 +44,9 @@ class ContactController extends Controller
         ]);
     }
 
-    public function distroy($contact_id){
-        $contact = Contact::where('contact_id', $contact_id)->delete();
+    public function destroy($contact_id)
+    {
+        $contact = Contact::where(['contact_id' => $contact_id, 'user_id' => auth()->id()])->delete();
         return response()->json('contact has deleted successfully');
     }
 }

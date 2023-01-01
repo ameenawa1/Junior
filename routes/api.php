@@ -13,9 +13,10 @@ Route::group(['namespace' => 'Api'], function () {
     Route::post('/change-password', [UserController::class, 'changePassword']);
     // Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::post('/update_card', [CardController::class, 'update']);
-    Route::post('/add_contact/{contact_id}', [ContactController::class, 'add_contact']);
-    Route::get('/contacts', [ContactController::class, 'contacts_list']);
-    Route::get('/delete_contact/{contact_id}', [ContactController::class, 'distroy']);
+
+    Route::get('/contact', [ContactController::class, 'contacts_list']);
+    Route::post('/contact/{contact_id}', [ContactController::class, 'add_contact']);
+    Route::delete('/contact/{contact_id}', [ContactController::class, 'destroy']);
 });
 
 

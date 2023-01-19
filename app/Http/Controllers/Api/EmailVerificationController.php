@@ -7,6 +7,7 @@ use App\Models\Card;
 use Illuminate\Http\Request;
 use App\Models\EmailVerification;
 use App\Models\User;
+use Auth;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -30,31 +31,39 @@ class EmailVerificationController extends Controller
             "email" => "required|string|email|max:25",
         ]);
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json($validator->errors(), 400);
         }
         $request_code = $data['verification_code'];
         $user = User::where('email', '=', $data['email'])->first();
         if (!$user) {
-            return response()->json("Error, user not found.");
+            return response()->json(["error" => "user not found."], 404);
         }
         if ($user['verified'] == 1) {
-            return response()->json("You're verified gtfo.");
+            return response()->json(["message" => "already verified."], 200);
         }
         $correctcode = EmailVerification::where('user_id', '=', $user['id'])->first();
         if (!$correctcode) {
-            return response()->json("Error proccessing code, please request a new verification code.");
+            return response()->json(["error" => "Error proccessing code, please request a new verification code."], 500);
         }
         if ($request_code == $correctcode['code']) {
             $user['verified'] = 1;
             $user->save();
+
+            $token = Auth::login($user);
             EmailVerification::find($correctcode['id'])->delete();
+
             Card::create([
-                'user_id' => $user->id
+                'user_id' => $user->id 
             ]);
-            return response()->json('User verified', 200);
+            return response()->json(["meesage" => 'User verified',
+                                     "user" => $user,
+                                     'authorization' => [
+                                        'token' => $token,
+                                        'type' => 'bearer',
+                                    ]], 200);
         } else {
-            response()->json('u fucked up and now imma die :( *dies*', 300)->send();
-            die;
+            return response()->json(["error" => 'Internal server error.'], 500);
+
         }
     }
 }

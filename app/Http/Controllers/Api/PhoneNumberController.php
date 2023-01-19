@@ -17,7 +17,7 @@ class PhoneNumberController extends Controller
         if($number2)
         {
             PhoneNumber::create([
-                'number' => $number1,
+                'number' => $number2,
                 'card_id' => $card_id,
             ]);
         }

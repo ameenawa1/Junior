@@ -8,23 +8,29 @@ use Illuminate\Database\Eloquent\Model;
 class Card extends Model
 {
     use HasFactory;
+
     protected $fillable = [
+        'user_id',
         'displayname',
         'job_title',
         'about',
-        'email',
         'address',
-        'phone_num1',
-        'phone_num2',
-        'facebook',
-        'instagram',
-        'linkedin',
-        'github'
+        'profile_image',
+
     ];
-    public $timestamps = false;
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function phonenumbers()
+    {
+        return $this->hasMany(PhoneNumber::class);
+    }
+
+    public function links()
+    {
+        return $this->hasMany(Link::class);
     }
 }

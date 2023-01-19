@@ -35,7 +35,7 @@ class AuthController extends Controller
             }
             $x = new EmailVerificationController();
             if (!$x->check($request->email)) {
-                return response()->json('go verify bitch', 300);
+                return response()->json(['error' => 'Email is not verified'], 300);
             };
             $token = Auth::attempt($request->except('_token'));
             $data = [
@@ -45,11 +45,11 @@ class AuthController extends Controller
             ];
             if ($data['user']['role_id'] == 1) {
                 Auth::logout();
-                return response()->json("Login not allowed", 401);
+                return response()->json(["error" => "Login not allowed"], 401);
             }
             return response()->json($data);
         } else {
-            die;
+            return response()->json(["error" => "You're already logged in."],300);
         }
     }
 
@@ -75,7 +75,7 @@ class AuthController extends Controller
             'password' => Hash::make($req['password']),
             'role_id' => 2,
         ]);
-        $token = Auth::login($user);
+        //$token = Auth::login($user);
         $code = rand(10000, 99999);
         EmailVerification::create([
             'user_id' => $user->id,
@@ -88,11 +88,11 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'User created successfully, Please check your email for the verification code.',
             'user' => $user,
-            'authorisation' => [
+            /*'authorization' => [
                 'token' => $token,
                 'type' => 'bearer',
-            ]
-        ]);
+            ]*/
+        ], 200);
     }
 
     public function logout()
@@ -101,7 +101,7 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Successfully logged out',
-        ]);
+        ], 200);
     }
 
     public function refresh()
@@ -109,10 +109,10 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'user' => Auth::user(),
-            'authorisation' => [
+            'authorization' => [
                 'token' => Auth::refresh(),
                 'type' => 'bearer',
             ]
-        ]);
+        ], 200);
     }
 }

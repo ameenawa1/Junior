@@ -8,14 +8,16 @@ Route::group(['namespace' => 'Api'], function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/resend_code', [UserController::class, 'resend_code']);
+    Route::post('/veset-password', [UserController::class, 'resetPass']);
     Route::post('/verify', [EmailVerificationController::class, 'verify']);
-    Route::post('/reset-password', [UserController::class, 'resetPass']);
-    Route::post('/change-password', [UserController::class, 'changePassword']);
+    Route::post('/renge-password', [UserController::class, 'changePassword']);
     // Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::post('/update_card', [CardController::class, 'update']);
+    Route::get('/add_contact/{user_id?}', [ContactController::class, 'add_contact']);
+    Route::get('/contacts', [ContactController::class, 'contacts_list']);
+    Route::get('/user/{id}', [UserController::class, 'getUser']);
+    Route::get('/card/{id}', [CardController::class, 'getCard']);
 
-    Route::get('/contact', [ContactController::class, 'contacts_list']);
-    Route::post('/contact/{contact_id}', [ContactController::class, 'add_contact']);
     Route::delete('/contact/{contact_id}', [ContactController::class, 'destroy']);
 });
 

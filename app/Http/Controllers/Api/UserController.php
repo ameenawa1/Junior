@@ -33,7 +33,7 @@ class UserController extends Controller
         }
         $user = User::where('email', '=', $data['email'])->first();
         if (!$user) {
-            return response()->json("User not found.", 422);
+            return response()->json(["error" => "User not found."], 404);
         }
         $code = rand(10000, 99999);
         $email = $user['email'];
@@ -44,8 +44,8 @@ class UserController extends Controller
             'email' => $email,
             'token' => $code
         ]);
-        $mailer = new MailController();
-        $mailer->send_password_reset_code($code, $email);
+        $x = new MailController();
+        $x->send_password_reset_code($code, $email);
         return response()->json('Check your email for the password reset code.');
     }
 
@@ -61,16 +61,16 @@ class UserController extends Controller
         if ($validator->fails()) return response()->json($validator->errors(), 422);
 
         $user = User::where('email', $data['email'])->first();
-        if (!$user) return response()->json("User not found");
+        if (!$user) return response()->json(["error" => "User not found"],404);
 
         $password_reset = PasswordReset::where('email', $data['email'])->first();
-        if (!$password_reset) return response()->json("There is no reset code");
-        if($password_reset->token != $data['code']) return response()->json("The reset code is incorrect");
+        if (!$password_reset) return response()->json(["error" => "Internal server error, contact support."],500);
+        if($password_reset->token != $data['code']) return response()->json(["error" =>"The reset code is incorrect"], 422);
 
         $user->password = Hash::make($data['new_password']);
         $user->save();
         PasswordReset::where('email', $user->email)->delete();
-        return response()->json("Password has been changed successfully");
+        return response()->json(["message" => "Password has been changed successfully"], 200);
     }
 
     public function resend_code(Request $req)
@@ -84,10 +84,10 @@ class UserController extends Controller
         }
         $user = User::where('email', '=', $data['email'])->first();
         if (!$user) {
-            return response()->json("User not found");
+            return response()->json(["error" => "User not found"], 404);
         }
         if ($user['verified'] == 1) {
-            return response()->json("User is already verified.");
+            return response()->json(["message" => "User is already verified."], 200);
         }
         $code = EmailVerification::where('user_id', '=', $user['id'])->first();
         if (!$code) {
@@ -101,26 +101,50 @@ class UserController extends Controller
         }
         $x = new MailController();
         $x->sendcode($send_me_as_code, $user->email);
-        return response()->json("Success", 200);
+        return response()->json(["message" => "Success"], 200);
     }
-
+    public function getUser(int $id){
+        $user = User::findOrFail($id);
+        $user = $user->with('card')->get();
+        return response()->json(['user'=>$user]);
+    }
     public function create_card(Request $req)
     {
         if (Auth::check()) {
             $validator = Validator::make($req->all(), [
+                'profile_image' => 'required|image|max:5120',
+                'displayname' => 'required|string|max:20',
+                'job_title' => 'required|string|max:100',
+                'about' => 'required|string|max:255',
                 'email' => 'required|string|email|max:25',
-                'address' => 'nullable|string|max:255',
-                'phone_number1' => 'required|string|max:255',
-                'phone_number2' => 'nullable|string|max:255',
-                'link1' => 'nullable|string|max:255',
-                'link2' => 'nullable|string|max:255',
-                'link3' => 'nullable|string|max:255',
-                'link4' => 'nullable|string|max:255',
-                'link5' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:255',             /***CHECK CARD MODEL AND CARD MIGRATION */
+                'phone_num1' => 'required|string|max:255',       /**FIX THIS FUNCTION */
+                'phone_num2' => 'nullable|string|max:255',
+                'linkedin' => 'nullable|string|max:255',
+                'instagram' => 'nullable|string|max:255',
+                'github' => 'nullable|string|max:255',
+                'facebook' => 'nullable|string|max:255',
+
             ]);
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
+
+            //image
+            $filename = "";
+            if ($req->hasFile('profile_image')) {
+                if (!file_exists(public_path('uploaded_images'))) {
+                    mkdir(public_path('uploaded_images'), 0777, true);
+                }
+                $file = $req->file('profile_image');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $file->move('uploaded_images', $fileName);
+            }
+
+
+
+
+
             #validate email regex DONE
             #check if email exists in db
             #if it exists check if the owner is the same person creating the card
@@ -133,7 +157,7 @@ class UserController extends Controller
                 #check owner
                 #$current_user = Auth::user();
                 if (!$user->email == $email) {
-                    return response()->json("This email is owned by a different account.", 301);
+                    return response()->json(["error" => "This email is owned by a different account."], 422);
                 }
             }
             /*if(! EmailVerificationController::check($req->email)) #allow different emails
@@ -149,22 +173,31 @@ class UserController extends Controller
             };*/
             //dd($user);
             if (!$user['email'] == $req['email']) {
-                return respone()->json("smt wrong tf", 69);
+                return respone()->json(["error" => "internal server error"], 500);
             }
             $id = $user['id'];
             //$check = Card::where('user_id', '=', $id)->first();
             if (Card::where('user_id', '=', $id)->count() > 0) {
-                return response()->json('u already have a card gtfo', 300);
+                return response()->json(["error" => 'User can only have 1 card at a time.'], 300);
+            }
+            if(strlen($filename) > 237)
+            {
+                return response()->json([
+                    'error' => 'file name too long'
+                ], 400);
             }
             $card = Card::create([
+                'profile_image' => url('/').'/uploaded_images/'.$fileName,
+                'displayname' => $req['displayname'],
+                'job_title' => $req['job_title'],
+                'about' => $req['about'],
                 'address' => $req['address'],
-                'qr_code' => $req['qr_code'],
                 'user_id' => $id,
             ]);
             $id = $card['id'];
-            $ph1 = $req['phone_number1'];
-            $ph2 = $req['phone_number2'];
-            $links = [$req['link1'], $req['link2'], $req['link3'], $req['link4'], $req['link5']];
+            $ph1 = $req['phone_num1'];
+            $ph2 = $req['phone_num2'];
+            $links = [$req['instagram'], $req['facebook'], $req['linkedin'], $req['github']];
             if ($ph2) {
                 PhoneNumberController::add($id, $ph1, $ph2);
             } else {
@@ -175,9 +208,9 @@ class UserController extends Controller
                     LinkController::add($id, $link);
                 }
             }
-            return response()->json('card created', 200);
+            return response()->json(["message" =>'card created'], 200);
         } else {
-            return response()->json("Please login to create a card", 401);
+            return response()->json(["error" => "Please login to create a card"], 401);
         }
     }
 }

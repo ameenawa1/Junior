@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use App\Models\Card;
+
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -36,6 +38,29 @@ class User extends Authenticatable implements JWTSubject
     public function contacts()
     {
         return $this->belongsToMany(User::class, 'contacts', 'user_id', 'contact_id');
+    }
+
+    public static function mycontactshelper($obj){
+
+        $cards = Card::where('user_id','=',$obj->id)->first();
+        //dd($card);
+
+        return $obj->contacts;
+    }
+
+    public function toArray()
+    {
+
+        return
+        [
+            'id' => $this->id,
+            'first_name' => $this->first_name,
+            'email' => $this->email,
+            'card' => $this->card
+            /*'contacts' => $contacts*/
+        ];
+
+
     }
 
     public function card()

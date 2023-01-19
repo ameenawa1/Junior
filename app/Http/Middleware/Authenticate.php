@@ -3,6 +3,10 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Auth;
+use PHPOpenSourceSaver\JWTAuth;
+use App\Models\User;
+
 
 class Authenticate extends Middleware
 {
@@ -14,9 +18,19 @@ class Authenticate extends Middleware
      */
     protected function redirectTo($request)
     {
+        $cookie=$_COOKIE['Authorization'];
+        $cookie = str_replace('Bearer ', '',$cookie);
+        JWTAuth::toUser($cookie);
 
         if (! $request->expectsJson()) {
-            return route('login');
+            return route('home');
+            dd('auth');
         }
+            dd('noauth');
+        return $next($request);
+
     }
+
+
+
 }

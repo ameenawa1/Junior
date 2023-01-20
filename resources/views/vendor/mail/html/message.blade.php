@@ -21,7 +21,7 @@
 {{-- Footer --}}
 @slot('footer')
 @component('mail::footer')
-© {{ date('Y') }} DexAlSexxx. @lang('All rights reserved.')
+© {{ date('Y') }} AlDexx. @lang('All rights reserved.')
 @endcomponent
 @endslot
 @endcomponent

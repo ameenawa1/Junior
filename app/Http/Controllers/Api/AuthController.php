@@ -75,7 +75,6 @@ class AuthController extends Controller
             'password' => Hash::make($req['password']),
             'role_id' => 2,
         ]);
-        //$token = Auth::login($user);
         $code = rand(10000, 99999);
         EmailVerification::create([
             'user_id' => $user->id,
@@ -88,10 +87,7 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'User created successfully, Please check your email for the verification code.',
             'user' => $user,
-            /*'authorization' => [
-                'token' => $token,
-                'type' => 'bearer',
-            ]*/
+
         ], 200);
     }
 

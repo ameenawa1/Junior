@@ -13,10 +13,7 @@ class AdminController extends Controller
 {
     public function __construct()
     {
-        /*$this->middleware('auth:web', ['except' => ['login']]);*/
-
-
-
+        
     }
 
     public function logout(){
@@ -29,10 +26,6 @@ class AdminController extends Controller
 
     public function login(Request $req)
     {
-
-
-        //return view('auth.login');
-
 
         if(! Auth::guard('web')->check()){
 

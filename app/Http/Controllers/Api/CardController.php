@@ -33,7 +33,7 @@ class CardController extends Controller
 
             $user = auth()->user();
             $card = $user->card;
-            dd($card);
+            
             if ($request->hasFile('profile_image')) {
                 if (!file_exists(public_path('uploaded_images'))) {
                     mkdir(public_path('uploaded_images'), 0777, true);

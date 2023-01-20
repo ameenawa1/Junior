@@ -37,10 +37,7 @@ class UserController extends Controller
         }
         $code = rand(10000, 99999);
         $email = $user['email'];
-        PasswordReset::create([   #CONTINUE HERE ----- ADD SOME REFERENCE TO THE USER FOR ADDED SECURITY THEN-
-            # CONTINUE IN CHECK_PASSWORD_RESET_CODE FUNCTION AND CHECK IF THE CODE IS
-            # CORRECT AND OWNED BY THE USER OR NOT
-            # THEN CREATE A PASSWORD CHANGE FUNCTION THAT UPDATES THE DB
+        PasswordReset::create([
             'email' => $email,
             'token' => $code
         ]);
@@ -117,8 +114,8 @@ class UserController extends Controller
                 'job_title' => 'required|string|max:100',
                 'about' => 'required|string|max:255',
                 'email' => 'required|string|email|max:25',
-                'address' => 'nullable|string|max:255',             /***CHECK CARD MODEL AND CARD MIGRATION */
-                'phone_num1' => 'required|string|max:255',       /**FIX THIS FUNCTION */
+                'address' => 'nullable|string|max:255',
+                'phone_num1' => 'required|string|max:255',
                 'phone_num2' => 'nullable|string|max:255',
                 'linkedin' => 'nullable|string|max:255',
                 'instagram' => 'nullable|string|max:255',
@@ -140,43 +137,20 @@ class UserController extends Controller
                 $fileName = time() . '_' . $file->getClientOriginalName();
                 $file->move('uploaded_images', $fileName);
             }
-
-
-
-
-
-            #validate email regex DONE
-            #check if email exists in db
-            #if it exists check if the owner is the same person creating the card
-            #else reject the email
             $email = $req->email;
             $email_checker = User::where('email', '=', $email)->first();
             $user = Auth::user();
             if ($email_checker) {
                 #email is in db
                 #check owner
-                #$current_user = Auth::user();
                 if (!$user->email == $email) {
                     return response()->json(["error" => "This email is owned by a different account."], 422);
                 }
             }
-            /*if(! EmailVerificationController::check($req->email)) #allow different emails
-            {
-                if (! $token = auth()->attempt($validator->validated())) {
-                    return response()->json(['error' => 'Unauthorized'], 401);
-                }
-                $token = Auth::attempt($request->except('_token'));
-                #dd($token);
-                return response()->json("Email not found",404);
-                #return response()->json('test message', 300); #problem wrong login info
-                #not verified
-            };*/
-            //dd($user);
             if (!$user['email'] == $req['email']) {
                 return respone()->json(["error" => "internal server error"], 500);
             }
             $id = $user['id'];
-            //$check = Card::where('user_id', '=', $id)->first();
             if (Card::where('user_id', '=', $id)->count() > 0) {
                 return response()->json(["error" => 'User can only have 1 card at a time.'], 300);
             }

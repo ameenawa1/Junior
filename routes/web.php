@@ -23,28 +23,5 @@ Route::group(['middleware' => 'wbl'], function(){
     Route::get('/logout', [AdminController::class, 'logout'])->name('logout');
     Route::patch('/updateuser/{id}',[DashboardController::class, 'update']);
     Route::delete('/deleteuser/{id}',[DashboardController::class, 'delete']);
-    #updateuser patch
-    #deleteuser/{id} delete
 });
-
-
-
-
-
-
-/*Route::get('/login',[AdminController::class, 'login'])->middleware('guest');
-Route::post('/login',[AdminController::class, 'login'])->name('weblog');
-
-Route::post('logout',[AdminController::class, 'logout'])->middleware('auth');
-
-    Route::group(['middleware' => 'auth','namespace' => 'admin'],function(){
-
-
-        Route::get('suck',function(){return response('test', 200); });
-    });
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');*/
-
 

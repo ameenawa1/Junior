@@ -43,8 +43,6 @@ class User extends Authenticatable implements JWTSubject
     public static function mycontactshelper($obj){
 
         $cards = Card::where('user_id','=',$obj->id)->first();
-        //dd($card);
-
         return $obj->contacts;
     }
 

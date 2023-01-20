@@ -15,12 +15,7 @@ class ContactController extends Controller
     {
         if(Auth::check())
         {
-
-            /*$contacts = User::with('contacts', 'contacts.card')->find(auth()->id());*/
-
             $contacts = User::mycontactshelper(Auth::User());
-
-            //dd($contacts);
             return response()->json([
                 'message' => 'success',
                 'data' => $contacts,
@@ -46,7 +41,6 @@ class ContactController extends Controller
             }
 
             $user = User::find($contact_id);
-            //dd($user);
             if ($user == null)
                 return response()->json(['error' => 'there is no user with this id'], 400);
 
@@ -57,17 +51,11 @@ class ContactController extends Controller
             if ($contact != null)
                 return response()->json(['error' => 'You already have this user in your contacts list'], 300);
 
-            /*Contact::create([
-                'user_id' => auth()->id(),
-                'contact_id' => $user_id
-            ]);*/
-
             $contact = auth()->user()->contacts()->attach($user_id);
-            //$contacts = User::with('contacts', 'contacts.card')->find(auth()->id());
 
             return response()->json([
                 'message' => 'added successfully',
-                /*'data' => $contacts*/
+                
             ], 200);
         }
         else{

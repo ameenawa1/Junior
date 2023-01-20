@@ -27,8 +27,6 @@ class DashboardController extends Controller
         $email = $email->validated();
         $user = User::where('email','=',$email)->first();
 
-
-
         if($user == null){
             $user = User::find($id);
             $validator = Validator::make($req->only(['first_name','last_name','email']),[
@@ -45,23 +43,12 @@ class DashboardController extends Controller
             ]);
 
         }
-
-        /*if($validator->errors()-> == 'The email')
-            return;*/
-
-
         if ($validator->fails()) {
             return back()->withErrors($validator->errors());
         }
-
-        //$user = Auth::guard('web')->User();
         $data = $validator->validated();
-
-
-
         $user->update($data);
 
-        //$user->save();
         return redirect()->back();
 
     }

@@ -20,17 +20,10 @@ class EmailVerificationMiddleware
     {
 
         $user = User::where('email', '=', $request['email'])->first();
-        #dd($user);
         if($user != Null && !$user->verified)
         {
             return response()->json("you're not verified, check your email", 300);
-
-            /*redirect()
-                    ->route('login')
-                    ->with('message', 'You need to confirm your account. We have sent you an activation code, please check your email.');
-*/
         }
-        #return False;
         return $next($request);
     }
 }

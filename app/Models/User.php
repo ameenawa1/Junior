@@ -76,6 +76,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasone(EmailVerification::class);
     }
 
+    public function passwordreset()
+    {
+        return $this->hasone(PasswordReset::class);
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();

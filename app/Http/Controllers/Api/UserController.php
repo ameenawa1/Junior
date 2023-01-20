@@ -19,7 +19,9 @@ class UserController extends Controller
 {
     public function get_user_by_id($id = null)
     {
-        return $id ? User::find($id) : User::all();
+        if($id == 1)
+            return null;
+        return $id ? User::find($id) : null;
     }
 
     public function resetPass(Request $request)
@@ -46,12 +48,39 @@ class UserController extends Controller
         return response()->json('Check your email for the password reset code.');
     }
 
+
+    public function check_code(Request $data){
+        if(Auth::check()){
+
+
+        $validator = Validator::make($data, [
+            'email' => 'required|email',
+            'code' => 'required|numeric|digits:5',]);
+
+        if ($validator->fails()) return response()->json($validator->errors(), 422);
+        $password_reset = PasswordReset::where('email','=' ,$data['email'])->first();
+
+        $user = Auth::user();
+
+        if($user->id != $password_reset->user_id)
+        {
+            return response()->json(['error' => 'Not allowed', 300]);
+        }
+        if (!$password_reset) return response()->json(["error" => "Internal server error, contact support."],500);
+        if($password_reset->token == $data->code){
+                return response()->json(["message" =>"The reset code is correct"], 200);
+            }
+            else{return response()->json(["error" =>"The reset code is incorrect"], 422);}
+        }
+    }
+
+
     public function changePassword(Request $req)
     {
         $data = $req->all();
         $validator = Validator::make($data, [
             'email' => 'required|email',
-            'code' => 'required|numeric',
+            //'code' => 'required|numeric',
             'new_password' => 'required|string|confirmed|min:8',
             'new_password_confirmation' => 'required|string|min:8|same:new_password',
         ]);
@@ -60,9 +89,9 @@ class UserController extends Controller
         $user = User::where('email', $data['email'])->first();
         if (!$user) return response()->json(["error" => "User not found"],404);
 
-        $password_reset = PasswordReset::where('email', $data['email'])->first();
-        if (!$password_reset) return response()->json(["error" => "Internal server error, contact support."],500);
-        if($password_reset->token != $data['code']) return response()->json(["error" =>"The reset code is incorrect"], 422);
+        // $password_reset = PasswordReset::where('email', $data['email'])->first();
+        // if (!$password_reset) return response()->json(["error" => "Internal server error, contact support."],500);
+        //if($password_reset->token != $data['code']) return response()->json(["error" =>"The reset code is incorrect"], 422);
 
         $user->password = Hash::make($data['new_password']);
         $user->save();

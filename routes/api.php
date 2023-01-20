@@ -16,9 +16,9 @@ Route::group(['namespace' => 'Api'], function () {
     Route::post('/update_card', [CardController::class, 'update']);
     Route::get('/add_contact/{user_id?}', [ContactController::class, 'add_contact']);
     Route::get('/contacts', [ContactController::class, 'contacts_list']);
-    Route::get('/user/{id}', [UserController::class, 'getUser']);
+    Route::get('/user/{id?}', [UserController::class, 'get_user_by_id']); #getUser
     Route::get('/card/{id}', [CardController::class, 'getCard']);
-
+    Route::post('/check_code',[UserController::class, 'check_code']);#new
     Route::delete('/contact/{contact_id}', [ContactController::class, 'destroy']);
 });
 
@@ -26,7 +26,7 @@ Route::group(['namespace' => 'Api'], function () {
 Route::group([/*'middleware' => 'EmailVerificationMiddleware',*/'namespace' => 'Api'], function () {
     //Route::get('api-test/{id?}', [UserController::class, 'get_user_by_id']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/loginweb', [AuthController::class, 'login']);
+
     Route::post('/createcard', [UserController::class, 'create_card']); #add gate
 });
 

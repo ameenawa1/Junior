@@ -11,12 +11,20 @@ class PasswordReset extends Model
 
     public $timestamps = false;
     protected $fillable = [
+        'user_id',
         'email',
         'token',
     ];
-    
+
     protected $hidden = [
         'created_at',
         'updated_at'
     ];
+
+    public function user()
+    {
+
+        return $this->belongsTo(User::class);
+
+    }
 }

@@ -1,13 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\{AdminController};
+use App\Http\Controllers\Admin\{AdminController, DashboardController};
 use Illuminate\Support\Facades\Auth;
 
 
 
+Route::get('/', function(){return response('Hello world', 200, );});
 
-Route::group(['middleware' => 'guest'],
+
+Route::group(['middleware' => 'wbg'],
 
     function(){
         Route::get('/', function(){ return view('auth.login'); });
@@ -15,11 +17,20 @@ Route::group(['middleware' => 'guest'],
         Route::post('/login', [AdminController::class, 'login']);
     });
 
-Route::group(['middleware' => 'auth'], function(){
+Route::group(['middleware' => 'wbl'], function(){
 
-    Route::get('/dashboard', function(){return view('home'); })->name('home');
-    Route::get('/logout', [AdminController::class, 'logout']);
+    Route::get('/dashboard', [DashboardController::class, 'index'] )->name('home');
+    Route::get('/logout', [AdminController::class, 'logout'])->name('logout');
+
+    #updateuser patch
+    #deleteuser/{id} delete
 });
+
+
+
+
+
+
 /*Route::get('/login',[AdminController::class, 'login'])->middleware('guest');
 Route::post('/login',[AdminController::class, 'login'])->name('weblog');
 

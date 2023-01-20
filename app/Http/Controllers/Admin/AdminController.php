@@ -15,24 +15,30 @@ class AdminController extends Controller
     {
         /*$this->middleware('auth:web', ['except' => ['login']]);*/
 
+
+
     }
 
     public function logout(){
-        if(Auth::check()){
-            Auth::logout();
+
+        if(Auth::guard('web')->check()){
+            Auth::guard('web')->logout();
+            return redirect('/login');
         }
     }
 
     public function login(Request $req)
     {
 
+
         //return view('auth.login');
 
-        if(! Auth::check()){
+
+        if(! Auth::guard('web')->check()){
 
             $data = $req->all();
 
-            //dd($data);
+
             $validator = Validator::make($data,[
                 'email' => 'required|email|string|max:25',
                 'password' => 'required|string|min:8',
@@ -41,38 +47,28 @@ class AdminController extends Controller
             if ($validator->fails()) {
                 return back()->withErrors($validator->errors());
             }
-            if (!$token = auth()->attempt($validator->validated())) {
+            if (! Auth::guard('web')->attempt(['email' => $req->email, 'password' => $req->password], $req->get('remember'))) {
                 return back()->withErrors(['email' =>'Unauthorized']);
             }
 
-            $user = ['user' => Auth::user()];
+
+            $user = ['user' => Auth::guard('web')->user()];
 
 
             if($user['user']['role_id'] == null){
+                Auth::guard('web')->logout();
                 return back()->withErrors(['email' =>'Unauthorized']);
             }
 
             if($user['user']['role_id'] != 1 ){
+                Auth::guard('web')->logout();
                 return back()->withErrors(['email' =>'Unauthorized']);
             }
-            //$token = Auth::attempt(/*$req->except('_token')*/);
-            //Auth::login($user);
-            $data = [
-                'token' => $token,
-                'user' => Auth::user(),
-            ];
 
-            $token='Bearer '.$token;
-
-
-
-            //$response->header('Authorization',$token);
-            Cookie::queue('Authorization', $token);
 
             return redirect('/dashboard');
         }
         else{
-            dd('x');
             return back()->withErrors(['email' =>'Already logged in']);
         }
 

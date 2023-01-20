@@ -43,7 +43,6 @@ class CardController extends Controller
                 $file->move('uploaded_images', $fileName);
             }
             $card->fill($request->all());
-            dd("27");
             $card->profile_image = isset($fileName) ? url('/') . '/uploaded_images/' . $fileName : null;
             $card->save();
             return response()->json([

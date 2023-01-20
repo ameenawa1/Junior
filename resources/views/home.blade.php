@@ -57,7 +57,7 @@
                                         <div id="editEmployeeModal_{{ $user->id }}" class="modal fade">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
-                                                    <form method='POST' action='/updateuser'>
+                                                    <form method='POST' action='/updateuser/{{$user->id}}'>
                                                         @csrf
                                                         @method('PATCH')
                                                         <div class="modal-header">

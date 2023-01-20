@@ -21,7 +21,8 @@ Route::group(['middleware' => 'wbl'], function(){
 
     Route::get('/dashboard', [DashboardController::class, 'index'] )->name('home');
     Route::get('/logout', [AdminController::class, 'logout'])->name('logout');
-
+    Route::patch('/updateuser/{id}',[DashboardController::class, 'update']);
+    Route::delete('/deleteuser/{id}',[DashboardController::class, 'delete']);
     #updateuser patch
     #deleteuser/{id} delete
 });
